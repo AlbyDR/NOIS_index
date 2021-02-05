@@ -13,4 +13,4 @@ b) allows to control model complexity, showing clearly the trade-off between pre
 
 c) quantifies overfitting based on a single error estimation, using all available observations to select the best model.
 
-The code NOIS_method show an example for the model approaches PLSR and SVM, but it works in an machine learning that do not apply internal feature selection. The data Spectra_DF.csv can be used as a guide to test the method. 
+The code NOIS_method show an example for the model approaches PLSR and SVM, but it works in any machine learning that do not apply internal feature selection. The data Spectra_DF.csv can be used as a guide to test the method. 
