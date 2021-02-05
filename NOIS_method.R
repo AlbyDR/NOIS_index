@@ -13,19 +13,14 @@ library(caret)
 # Spectra_DF is a hyperspectra dataset 
    # For instance, the first colunm with the response variable (e.g. LAI or Chl) and several colunms with wavelenghts (e.g. from 400nm to 2100nm)
    # The rows are the observations (e.g. n=100)
+   # It is a list with 3 different landscape or places
 
-# for one dataset
-Spectra_DF.csv <- read_csv("Spectra_DF.csv", col_names = T)
+# read dataset
+Spectra_DF <- read_csv("Spectra_DF.csv")
 
+# in the case of time series or multiple landscapes 
 set.seed(1234)
-GEdata000 <- mvrnorm(n=nrow(Spectra_DF), 
-                     colMeans(Spectra_DF[-1], # [-1] to exclude the response variable LAI
-                     na.rm = FALSE, dims=1),
-                     cov(Spectra_DF[-1]) )
-
-# in the case of time series or multiple landscapes
-set.seed(1234)
-GEdata000 <- data.frame(sapply(1:30, FUN = function(i)
+GEdata000 <- data.frame(sapply(1:3, FUN = function(i)
                  data.frame((mvrnorm(nrow(Spectra_DF[[i]]), 
                       colMeans(data.frame(Spectra_DF[[i]][-1]), # [-1] to exclude LAI
                                na.rm = FALSE, dims=1),
@@ -34,26 +29,26 @@ GEdata000 <- data.frame(sapply(1:30, FUN = function(i)
 ##############################################################################
 # check the remain correlation between LAI and each wavelength
 ##############################################################################
-CorMatrix <- data.frame(sapply(1:30, FUN = function(i) 
+CorMatrix <- data.frame(sapply(1:3, FUN = function(i) 
            data.frame(cor(data.frame(lai=Spectra_DF[[i]]$lai, GEdata000[[i]]))) ))
 
-CorYbandGE <- data.frame(sapply(1:30, FUN = function(i)
+CorYbandGE <- data.frame(sapply(1:3, FUN = function(i)
                          CorMatrix[[i]]$lai[-1]))
 
 # maximum Rsquared between LAI and a wavelength
 # based on the remain correlation a tolerance baseline can be adjusted
-sapply(1:30, FUN=function(i) max(abs(CorYbandGE[[i]]))^2)
+sapply(1:3, FUN=function(i) max(abs(CorYbandGE[[i]]))^2)
 
 # plot correlation per wavelength
 colour <- colorRamp(c("orange", "yellow"))
          
-Corspectra <- sapply(1:30, FUN = function(i) 
+Corspectra <- sapply(1:3, FUN = function(i) 
          speclib(CorYbandGE[[i]], rep(401:2501)))
 
 plot(Corspectra[[1]], FUN=1, ylim=c(-1,1),
      col=rgb(colour(4/8),maxColorValue=255))
    
-for (i in 2:30)
+for (i in 2:3)
   plot(Corspectra[[i]], FUN=i, new=FALSE,
        col=rgb(colour(i/30), maxColorValue=255))
 
@@ -71,7 +66,7 @@ kfold10 <- trainControl(method="repeatedcv", repeats=10) # K-fold cross-validati
 # 1 Partial Least Square regression (PLSR)
 # Tune from 1 to 20 components (accumulated) without cross-validation
 Plsfit1 <- c()
-for (i in 1:30) {
+for (i in 1:3) {
   Plsfit1[[i]] <- train(lai~., 
                         data=data.frame(lai=Spectra_DF[[i]]$lai, GEdata000[[i]]),
                         method = "pls", # package wrapped
@@ -80,7 +75,7 @@ for (i in 1:30) {
                         trControl = nonControl)} # no cross-validation
 
 Plsfit2 <- c()
-for (i in 1:30) {
+for (i in 1:3) {
   Plsfit2[[i]] <- train(lai~., 
                         data=data.frame(lai=Spectra_DF[[i]]$lai, GEdata000[[i]]),
                         method = "pls", # package wrapped
@@ -89,7 +84,7 @@ for (i in 1:30) {
                         trControl = nonControl)}
 
 Plsfit3 <- c()
-for (i in 1:30) {
+for (i in 1:3) {
   Plsfit3[[i]] <- train(lai~., 
                         data=data.frame(lai=Spectra_DF[[i]]$lai, GEdata000[[i]]),
                         method = "pls", # package wrapped
@@ -107,7 +102,7 @@ for (i in 1:30) {
                         trControl = nonControl)}
 
 Plsfit5 <- c()
-for (i in 1:30) {
+for (i in 1:3) {
   Plsfit5[[i]] <- train(lai~., 
                         data=data.frame(lai=Spectra_DF[[i]]$lai, GEdata000[[i]]),
                         method = "pls", # package wrapped
@@ -116,7 +111,7 @@ for (i in 1:30) {
                         trControl = nonControl)}
 
 Plsfit6 <- c()
-for (i in 1:30) {
+for (i in 1:3) {
   Plsfit6[[i]] <- train(lai~., 
                         data=data.frame(lai=Spectra_DF[[i]]$lai, GEdata000[[i]]),
                         method = "pls", # package wrapped
@@ -125,7 +120,7 @@ for (i in 1:30) {
                         trControl = nonControl)}
 
 Plsfit7 <- c()
-for (i in 1:30) {
+for (i in 1:3) {
   Plsfit7[[i]] <- train(lai~., 
                         data=data.frame(lai=Spectra_DF[[i]]$lai, GEdata000[[i]]),
                         method = "pls", # package wrapped
@@ -134,7 +129,7 @@ for (i in 1:30) {
                         trControl = nonControl)}
 
 Plsfit8 <- c()
-for (i in 1:30) {
+for (i in 1:3) {
   Plsfit8[[i]] <- train(lai~., 
                         data=data.frame(lai=Spectra_DF[[i]]$lai, GEdata000[[i]]),
                         method = "pls", # package wrapped
@@ -143,7 +138,7 @@ for (i in 1:30) {
                         trControl = nonControl)}
 
 Plsfit9 <- c()
-for (i in 1:30) {
+for (i in 1:3) {
   Plsfit9[[i]] <- train(lai~., 
                         data=data.frame(lai=Spectra_DF[[i]]$lai, GEdata000[[i]]),
                         method = "pls", # package wrapped
@@ -161,7 +156,7 @@ for (i in 1:30) {
                          trControl = nonControl)}
 
 Plsfit11 <- c()
-for (i in 1:30) {
+for (i in 1:3) {
   Plsfit11[[i]] <- train(lai~., 
                          data=data.frame(lai=Spectra_DF[[i]]$lai, GEdata000[[i]]),
                          method = "pls", # package wrapped
@@ -170,7 +165,7 @@ for (i in 1:30) {
                          trControl = nonControl)}
 
 Plsfit12 <- c()
-for (i in 1:30) {
+for (i in 1:3) {
   Plsfit12[[i]] <- train(lai~., 
                          data=data.frame(lai=Spectra_DF[[i]]$lai, GEdata000[[i]]),
                          method = "pls", # package wrapped
@@ -179,7 +174,7 @@ for (i in 1:30) {
                          trControl = nonControl)}
 
 Plsfit13 <- c()
-for (i in 1:30) {
+for (i in 1:3) {
   Plsfit13[[i]] <- train(lai~., 
                          data=data.frame(lai=Spectra_DF[[i]]$lai, GEdata000[[i]]),
                          method = "pls", # package wrapped
@@ -188,7 +183,7 @@ for (i in 1:30) {
                          trControl = nonControl)}
 
 Plsfit14 <- c()
-for (i in 1:30) {
+for (i in 1:3) {
   Plsfit14[[i]] <- train(lai~., 
                          data=data.frame(lai=Spectra_DF[[i]]$lai, GEdata000[[i]]),
                          method = "pls", # package wrapped
@@ -197,7 +192,7 @@ for (i in 1:30) {
                          trControl = nonControl)}
 
 Plsfit15 <- c()
-for (i in 1:30) {
+for (i in 1:3) {
   Plsfit15[[i]] <- train(lai~., 
                          data=data.frame(lai=Spectra_DF[[i]]$lai, GEdata000[[i]]),
                          method = "pls", # package wrapped
@@ -206,7 +201,7 @@ for (i in 1:30) {
                          trControl = nonControl)}
 
 Plsfit16 <- c()
-for (i in 1:30) {
+for (i in 1:3) {
   Plsfit16[[i]] <- train(lai~., 
                          data=data.frame(lai=Spectra_DF[[i]]$lai, GEdata000[[i]]),
                          method = "pls", # package wrapped
@@ -215,7 +210,7 @@ for (i in 1:30) {
                          trControl = nonControl)}
 
 Plsfit17 <- c()
-for (i in 1:30) {
+for (i in 1:) {
   Plsfit17[[i]] <- train(lai~., 
                          data=data.frame(lai=Spectra_DF[[i]]$lai, GEdata000[[i]]),
                          method = "pls", # package wrapped
@@ -224,7 +219,7 @@ for (i in 1:30) {
                          trControl = nonControl)}
 
 Plsfit18 <- c()
-for (i in 1:30) {
+for (i in 1:3) {
   Plsfit18[[i]] <- train(lai~., 
                          data=data.frame(lai=Spectra_DF[[i]]$lai, GEdata000[[i]]),
                          method = "pls", # package wrapped
@@ -233,7 +228,7 @@ for (i in 1:30) {
                          trControl = nonControl)}
 
 Plsfit19 <- c()
-for (i in 1:30) {
+for (i in 1:3) {
   Plsfit19[[i]] <- train(lai~., 
                          data=data.frame(lai=Spectra_DF[[i]]$lai, GEdata000[[i]]),
                          method = "pls", # package wrapped
@@ -242,7 +237,7 @@ for (i in 1:30) {
                          trControl = nonControl)}
 
 Plsfit20 <- c()
-for (i in 1:30) {
+for (i in 1:3) {
   Plsfit20[[i]] <- train(lai~., 
                          data=data.frame(lai=Spectra_DF[[i]]$lai, GEdata000[[i]]),
                          method = "pls", # package wrapped
@@ -252,7 +247,7 @@ for (i in 1:30) {
 
 # With cross-validation and up 20 to component
 Plsfitcv <- c()
-for (i in 1:30) {
+for (i in 1:3) {
   Plsfitcv[[i]] <- train(lai~., 
                          data=data.frame(lai=Spectra_DF[[i]]$lai, GEdata000[[i]]),
                          method = "pls", # package wrapped
@@ -262,7 +257,7 @@ for (i in 1:30) {
 
 # Original data With cross-validation and up to 20 component
 Pls000original <- c()
-for (i in 1:30) {
+for (i in 1:3) {
   Pls000original[[i]] <- train(lai~., 
                           data=data.frame(Spectra_DF[[i]]), #originaldata
                           method = "pls", # package wrapped
@@ -274,16 +269,16 @@ for (i in 1:30) {
 # calculating RMSE for the Naive Models - PLSR
 ###################################################################################################################
 RMSE.000 <- t(data.frame(
-  "1"=sapply(1:30, FUN=function(i) postResample(predict(Plsfit1[[i]]), unlist(Spectra_DF[[i]]$lai)))['RMSE',],
-  "2"=sapply(1:30, FUN=function(i) postResample(predict(Plsfit2[[i]]), unlist(Spectra_DF[[i]]$lai)))['RMSE',],
-  "3"=sapply(1:30, FUN=function(i) postResample(predict(Plsfit3[[i]]), unlist(Spectra_DF[[i]]$lai)))['RMSE',],
-  "4"=sapply(1:30, FUN=function(i) postResample(predict(Plsfit4[[i]]), unlist(Spectra_DF[[i]]$lai)))['RMSE',],
-  "5"=sapply(1:30, FUN=function(i) postResample(predict(Plsfit5[[i]]), unlist(Spectra_DF[[i]]$lai)))['RMSE',],
-  "6"=sapply(1:30, FUN=function(i) postResample(predict(Plsfit6[[i]]), unlist(Spectra_DF[[i]]$lai)))['RMSE',],
-  "7"=sapply(1:30, FUN=function(i) postResample(predict(Plsfit7[[i]]), unlist(Spectra_DF[[i]]$lai)))['RMSE',],
-  "8"=sapply(1:30, FUN=function(i) postResample(predict(Plsfit8[[i]]), unlist(Spectra_DF[[i]]$lai)))['RMSE',],
-  "9"=sapply(1:30, FUN=function(i) postResample(predict(Plsfit9[[i]]), unlist(Spectra_DF[[i]]$lai)))['RMSE',],
-  "10"=sapply(1:30, FUN=function(i) postResample(predict(Plsfit10[[i]]), unlist(Spectra_DF[[i]]$lai)))['RMSE',],
+  "1"=sapply(1:3, FUN=function(i) postResample(predict(Plsfit1[[i]]), unlist(Spectra_DF[[i]]$lai)))['RMSE',],
+  "2"=sapply(1:3, FUN=function(i) postResample(predict(Plsfit2[[i]]), unlist(Spectra_DF[[i]]$lai)))['RMSE',],
+  "3"=sapply(1:3, FUN=function(i) postResample(predict(Plsfit3[[i]]), unlist(Spectra_DF[[i]]$lai)))['RMSE',],
+  "4"=sapply(1:3, FUN=function(i) postResample(predict(Plsfit4[[i]]), unlist(Spectra_DF[[i]]$lai)))['RMSE',],
+  "5"=sapply(1:3, FUN=function(i) postResample(predict(Plsfit5[[i]]), unlist(Spectra_DF[[i]]$lai)))['RMSE',],
+  "6"=sapply(1:3, FUN=function(i) postResample(predict(Plsfit6[[i]]), unlist(Spectra_DF[[i]]$lai)))['RMSE',],
+  "7"=sapply(1:3, FUN=function(i) postResample(predict(Plsfit7[[i]]), unlist(Spectra_DF[[i]]$lai)))['RMSE',],
+  "8"=sapply(1:3, FUN=function(i) postResample(predict(Plsfit8[[i]]), unlist(Spectra_DF[[i]]$lai)))['RMSE',],
+  "9"=sapply(1:3, FUN=function(i) postResample(predict(Plsfit9[[i]]), unlist(Spectra_DF[[i]]$lai)))['RMSE',],
+  "10"=sapply(1:, FUN=function(i) postResample(predict(Plsfit10[[i]]), unlist(Spectra_DF[[i]]$lai)))['RMSE',],
   "11"=sapply(1:30, FUN=function(i) postResample(predict(Plsfit11[[i]]), unlist(Spectra_DF[[i]]$lai)))['RMSE',],
   "12"=sapply(1:30, FUN=function(i) postResample(predict(Plsfit12[[i]]), unlist(Spectra_DF[[i]]$lai)))['RMSE',],
   "13"=sapply(1:30, FUN=function(i) postResample(predict(Plsfit13[[i]]), unlist(Spectra_DF[[i]]$lai)))['RMSE',],
@@ -317,7 +312,7 @@ axis(side = 2, at=c(0,.05,.1,.2,.3,.4,0.5,.6,.7,.8,.9,1),las=2,cex.axis=1.1)
 abline(h=0.05, col="red", lwd=2)
 abline(h=0.0, col="grey", lty="dotted", lwd=2)
 
-for (i in 1:30) { 
+for (i in 1:3) { 
   lines(rep(1:20), NOI000[[i]], type="b", col="green", new=F)
   points(Plsfitcv[[i]]$bestTune$ncomp, 
          NOI000[Plsfitcv[[i]]$bestTune$ncomp,i], type="p", 
@@ -332,7 +327,7 @@ for (i in 1:30) {
 ############## Tune SVM #######################
 ###############################################
 svmfit1 <- c()
-for (i in 1:30) {
+for (i in 1:3) {
   svmfit1[[i]] <- train(lai ~., 
                         data=data.frame(lai=Spectra_DF[[i]]$lai, GEdata000[[i]]),
                         method = "svmLinear2", 
@@ -340,7 +335,7 @@ for (i in 1:30) {
                         tuneGrid = expand.grid(cost=c(0.00005)))}
 
 svmfit2 <- c()
-for (i in 1:30) {
+for (i in 1:3) {
   svmfit2[[i]] <- train(lai ~., 
                         data=data.frame(lai=Spectra_DF[[i]]$lai, GEdata000[[i]]),
                         method = "svmLinear2", 
@@ -355,7 +350,7 @@ for (i in 1:30) {
                         tuneGrid = expand.grid(cost=c(0.00025)))}
 
 svmfit4 <- c()
-for (i in 1:30) {
+for (i in 1:3) {
   svmfit4[[i]] <- train(lai ~., 
                         data=data.frame(lai=Spectra_DF[[i]]$lai, GEdata000[[i]]),
                         method = "svmLinear2", 
@@ -363,7 +358,7 @@ for (i in 1:30) {
                         tuneGrid = expand.grid(cost=c(0.0005)))}
 
 svmfit5 <- c()
-for (i in 1:30) {
+for (i in 1:3) {
   svmfit5[[i]] <- train(lai ~., 
                         data=data.frame(lai=Spectra_DF[[i]]$lai, GEdata000[[i]]),
                         method = "svmLinear2", 
@@ -371,7 +366,7 @@ for (i in 1:30) {
                         tuneGrid = expand.grid(cost=c(0.001)))}
 
 svmfit6 <- c()
-for (i in 1:30) {
+for (i in 1:3) {
   svmfit6[[i]] <- train(lai ~., 
                         data=data.frame(lai=Spectra_DF[[i]]$lai, GEdata000[[i]]),
                         method = "svmLinear2", 
@@ -379,7 +374,7 @@ for (i in 1:30) {
                         tuneGrid = expand.grid(cost=c(0.0025)))}
 
 svmfit7 <- c()
-for (i in 1:30) {
+for (i in 1:3) {
   svmfit7[[i]] <- train(lai ~., 
                         data=data.frame(lai=Spectra_DF[[i]]$lai, GEdata000[[i]]),
                         method = "svmLinear2", 
@@ -387,7 +382,7 @@ for (i in 1:30) {
                         tuneGrid = expand.grid(cost=c(0.005)))}
 
 svmfit8 <- c()
-for (i in 1:30) {
+for (i in 1:3) {
   svmfit8[[i]] <- train(lai ~., 
                         data=data.frame(lai=Spectra_DF[[i]]$lai, GEdata000[[i]]),
                         method = "svmLinear2", 
@@ -395,7 +390,7 @@ for (i in 1:30) {
                         tuneGrid = expand.grid(cost=c(0.01)))}
 
 svmfit9 <- c()
-for (i in 1:30) {
+for (i in 1:3) {
   svmfit9[[i]] <- train(lai ~., 
                         data=data.frame(lai=Spectra_DF[[i]]$lai, GEdata000[[i]]),
                         method = "svmLinear2", 
@@ -403,7 +398,7 @@ for (i in 1:30) {
                         tuneGrid = expand.grid(cost=c(0.05)))}
 
 svmfit10 <- c()
-for (i in 1:30) {
+for (i in 1:3) {
   svmfit10[[i]] <- train(lai ~., 
                          data=data.frame(lai=Spectra_DF[[i]]$lai, GEdata000[[i]]),
                          method = "svmLinear2", 
@@ -411,7 +406,7 @@ for (i in 1:30) {
                          tuneGrid = expand.grid(cost=c(0.1)))}
 
 svmfit11 <- c()
-for (i in 1:30) {
+for (i in 1:3) {
   svmfit11[[i]] <- train(lai ~., 
                          data=data.frame(lai=Spectra_DF[[i]]$lai, GEdata000[[i]]),
                          method = "svmLinear2", 
@@ -423,7 +418,7 @@ costgrid <- expand.grid(cost=c(0.00005,0.0001,0.00025,0.0005, 0.001,
                                0.0025, 0.005, 0.01, 0.05, 0.1, 0.25))
 
 svmfitcv <- c()
-for (i in 1:30) {
+for (i in 1:3) {
   svmfitcv[[i]] <- train(lai ~., 
                           data=data.frame(lai=Spectra_DF[[i]]$lai, GEdata000[[i]]),
                           method = "svmLinear2", 
@@ -432,7 +427,7 @@ for (i in 1:30) {
 
 # original data with cross-validation and cost from .00005 to .25
 svm000original <- c()
-for (i in 1:30) {
+for (i in 1:3) {
   svm000original[[i]] <- train(lai ~., 
                           data=data.frame(Spectra_DF[[i]]),
                           method = "svmLinear2", 
@@ -443,29 +438,29 @@ for (i in 1:30) {
 # RMSE for the Naive Models - SVMR
 ###################################################################################################################
 RMSEsvm <- t(data.frame(
-  "0.000005"=sapply(1:30, FUN=function(i) postResample(predict(svmfit1[[i]]), unlist(Spectra_DF[[i]]$lai)))['RMSE',],
-  "0.00001"=sapply(1:30, FUN=function(i) postResample(predict(svmfit2[[i]]), unlist(Spectra_DF[[i]]$lai)))['RMSE',],
-  "0.00005"=sapply(1:30, FUN=function(i) postResample(predict(svmfit3[[i]]), unlist(Spectra_DF[[i]]$lai)))['RMSE',],
-  "0.0001"=sapply(1:30, FUN=function(i) postResample(predict(svmfit4[[i]]), unlist(Spectra_DF[[i]]$lai)))['RMSE',],
-  "0.00025"=sapply(1:30, FUN=function(i) postResample(predict(svmfit5[[i]]), unlist(Spectra_DF[[i]]$lai)))['RMSE',],
-  "0.0005"=sapply(1:30, FUN=function(i) postResample(predict(svmfit6[[i]]), unlist(Spectra_DF[[i]]$lai)))['RMSE',],
-  "0.001"=sapply(1:30, FUN=function(i) postResample(predict(svmfit7[[i]]), unlist(Spectra_DF[[i]]$lai)))['RMSE',],
-  "0.0025"=sapply(1:30, FUN=function(i) postResample(predict(svmfit8[[i]]), unlist(Spectra_DF[[i]]$lai)))['RMSE',],
-  "0.005"=sapply(1:30, FUN=function(i) postResample(predict(svmfit9[[i]]), unlist(Spectra_DF[[i]]$lai)))['RMSE',],
-  "0.01"=sapply(1:30, FUN=function(i) postResample(predict(svmfit10[[i]]), unlist(Spectra_DF[[i]]$lai)))['RMSE',],
-  "0.05"=sapply(1:30, FUN=function(i) postResample(predict(svmfit11[[i]]), unlist(Spectra_DF[[i]]$lai)))['RMSE',]))
+  "0.000005"=sapply(1:3, FUN=function(i) postResample(predict(svmfit1[[i]]), unlist(Spectra_DF[[i]]$lai)))['RMSE',],
+  "0.00001"=sapply(1:3, FUN=function(i) postResample(predict(svmfit2[[i]]), unlist(Spectra_DF[[i]]$lai)))['RMSE',],
+  "0.00005"=sapply(1:3, FUN=function(i) postResample(predict(svmfit3[[i]]), unlist(Spectra_DF[[i]]$lai)))['RMSE',],
+  "0.0001"=sapply(1:3, FUN=function(i) postResample(predict(svmfit4[[i]]), unlist(Spectra_DF[[i]]$lai)))['RMSE',],
+  "0.00025"=sapply(1:3, FUN=function(i) postResample(predict(svmfit5[[i]]), unlist(Spectra_DF[[i]]$lai)))['RMSE',],
+  "0.0005"=sapply(1:3, FUN=function(i) postResample(predict(svmfit6[[i]]), unlist(Spectra_DF[[i]]$lai)))['RMSE',],
+  "0.001"=sapply(1:3, FUN=function(i) postResample(predict(svmfit7[[i]]), unlist(Spectra_DF[[i]]$lai)))['RMSE',],
+  "0.0025"=sapply(1:3, FUN=function(i) postResample(predict(svmfit8[[i]]), unlist(Spectra_DF[[i]]$lai)))['RMSE',],
+  "0.005"=sapply(1:3, FUN=function(i) postResample(predict(svmfit9[[i]]), unlist(Spectra_DF[[i]]$lai)))['RMSE',],
+  "0.01"=sapply(1:3, FUN=function(i) postResample(predict(svmfit10[[i]]), unlist(Spectra_DF[[i]]$lai)))['RMSE',],
+  "0.05"=sapply(1:3, FUN=function(i) postResample(predict(svmfit11[[i]]), unlist(Spectra_DF[[i]]$lai)))['RMSE',]))
 
 ############################################################################
 # Naive overfitting index for the 11 levels of cost
 ############################################################################
-NOI000svm = data.frame(sapply(1:30, FUN=function(i) 
+NOI000svm = data.frame(sapply(1:3, FUN=function(i) 
   data.frame(NOI=1-(RMSEsvm[,i]/RMSELAIav[i,]))))
 #############################################################################
 
 costnames<-c(0.00005,0.0001,0.00025,0.0005, 0.001,
              0.0025, 0.005, 0.01, 0.05, 0.1, 0.25)
 
-cost <- sapply(1:30, FUN = function(i) svmfitcv[[i]]$bestTune$cost)
+cost <- sapply(1:3, FUN = function(i) svmfitcv[[i]]$bestTune$cost)
 cost[cost==0.00005] <- 1
 cost[cost==0.0001]  <- 2
 cost[cost==0.00025] <- 3
@@ -478,7 +473,7 @@ cost[cost==0.05]    <- 9
 cost[cost==0.1]     <- 10
 cost[cost==0.25]    <- 11
 
-cost2 <- sapply(1:30, FUN = function(i) svm000original[[i]]$bestTune$cost)
+cost2 <- sapply(1:3, FUN = function(i) svm000original[[i]]$bestTune$cost)
 cost2[cost2==0.00005] <- 1
 cost2[cost2==0.0001]  <- 2
 cost2[cost2==0.00025] <- 3
@@ -502,7 +497,7 @@ axis(side = 2, at=c(0,.05,.1,.2,.3,.4,0.5,.6,.7,.8,.9,1),las=2,cex.axis=1.1)
 abline(h=0.05, col="red", lwd=2) # tolerance baseline
 abline(h=0.0, col="grey", lty="dotted", lwd=2)
 
-for (i in 1:30) { 
+for (i in 1:3) { 
     lines(rep(1:11), NOI000svm[[i]], type="b", col="green", new=F)
     points(cost[i], NOI000svm[cost[i],i], # complexity tuned generated data model
            type="p", col="black", new=F)
