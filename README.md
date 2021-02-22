@@ -16,4 +16,4 @@ c) quantifies overfitting based on a single error estimation, using all availabl
 The code NOIS_method show an example for the model approaches PLSR and SVM, but it works in any machine learning that do not apply internal feature selection. The data Spectra_DF.csv can be used as a guide to test the method. 
 
 # Referece
-'[1] Rocha, A.D., Groen, T.A., Skidmore, A.K., Darvishzadeh, R., Willemen, L., 2017. The Naïve Overfitting Index Selection (NOIS): A new method to optimize model complexity for hyperspectral data. ISPRS J. Photogramm. Remote Sens. 133, 61–74. https://doi.org/10.1016/j.isprsjprs.2017.09.012'
+[1] Rocha, A.D., Groen, T.A., Skidmore, A.K., Darvishzadeh, R., Willemen, L., 2017. The Naïve Overfitting Index Selection (NOIS): A new method to optimize model complexity for hyperspectral data. ISPRS J. Photogramm. Remote Sens. 133, 61–74. https://doi.org/10.1016/j.isprsjprs.2017.09.012
